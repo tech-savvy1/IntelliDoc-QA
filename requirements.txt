@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
+pydantic-settings
+jinja2
+langchain
+langchain-community
+langchain-openai
+langchain-pinecone
+pypdf
