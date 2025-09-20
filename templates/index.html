@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliDoc QA - Chat with your PDF</title>
+    <style>
+        :root {
+            --background-color: #f0f2f5;
+            --container-bg: #ffffff;
+            --primary-color: #007bff;
+            --text-color: #333;
+            --border-color: #ddd;
+            --user-msg-bg: #007bff;
+            --bot-msg-bg: #e9ecef;
+            --bot-msg-text: #333;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: var(--text-color);
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 700px;
+            height: 90vh;
+            max-height: 800px;
+            background-color: var(--container-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        .upload-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+        .upload-section input[type="file"] { display: none; }
+        .upload-label {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .upload-label:hover { background-color: #0056b3; }
+        #upload-status {
+            margin-top: 1rem;
+            font-style: italic;
+            color: #666;
+            min-height: 20px;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 10px auto 0;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .chat-area {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-messages {
+            flex-grow: 1;
+        }
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: var(--user-msg-bg);
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        .bot-message {
+            background-color: var(--bot-msg-bg);
+            color: var(--bot-msg-text);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        .chat-input-area {
+            border-top: 1px solid var(--border-color);
+            padding: 1rem;
+        }
+        #chat-form {
+            display: flex;
+            gap: 10px;
+        }
+        #chat-form input {
+            flex-grow: 1;
+            padding: 12px;
+            border-radius: 25px;
+            border: 1px solid var(--border-color);
+            font-size: 1rem;
+            outline: none;
+        }
+        #chat-form input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(0,123,255,0.25); }
+        #chat-form button {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        #chat-form button:hover { background-color: #0056b3; }
+        #chat-form button:disabled { background-color: #a0c7ff; cursor: not-allowed; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <header>IntelliDoc QA</header>
+        
+        <div class="upload-section" id="upload-section">
+            <h4>1. Upload your PDF Document</h4>
+            <form id="upload-form">
+                <label for="pdf-file" class="upload-label">Select PDF File</label>
+                <input type="file" id="pdf-file" name="file" accept="application/pdf">
+            </form>
+            <div id="upload-status"></div>
+            <div class="spinner" id="upload-spinner"></div>
+        </div>
+
+        <div class="chat-area hidden" id="chat-area">
+            <h4>2. Ask Questions</h4>
+            <div class="chat-messages" id="chat-messages">
+                </div>
+            <div class="chat-input-area">
+                <form id="chat-form">
+                    <input type="text" id="query-input" placeholder="Ask something about the document..." autocomplete="off" disabled>
+                    <button type="submit" id="send-button" disabled>Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const uploadForm = document.getElementById('upload-form');
+    const pdfFileInput = document.getElementById('pdf-file');
+    const uploadStatus = document.getElementById('upload-status');
+    const uploadSpinner = document.getElementById('upload-spinner');
+    
+    const chatArea = document.getElementById('chat-area');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const queryInput = document.getElementById('query-input');
+    const sendButton = document.getElementById('send-button');
+
+    let currentDocId = null;
+
+    // Handle PDF file selection and upload
+    pdfFileInput.addEventListener('change', () => {
+        if (pdfFileInput.files.length > 0) {
+            uploadForm.dispatchEvent(new Event('submit'));
+        }
+    });
+
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        const file = pdfFileInput.files[0];
+        if (!file) {
+            uploadStatus.textContent = 'Please select a file first.';
+            return;
+        }
+        formData.append('file', file);
+
+        // UI feedback for upload
+        uploadStatus.textContent = `Uploading "${file.name}"...`;
+        uploadSpinner.style.display = 'block';
+
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to upload file.');
+            }
+
+            const data = await response.json();
+            currentDocId = data.doc_id;
+
+            // Update UI on successful upload
+            uploadStatus.innerHTML = `✅ Ready to chat with <strong>${data.filename}</strong>!`;
+            chatArea.classList.remove('hidden');
+            queryInput.disabled = false;
+            sendButton.disabled = false;
+            queryInput.focus();
+
+        } catch (error) {
+            uploadStatus.textContent = `Error: ${error.message}`;
+        } finally {
+            uploadSpinner.style.display = 'none';
+        }
+    });
+
+    // Handle chat form submission
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const query = queryInput.value.trim();
+        if (!query || !currentDocId) return;
+
+        // Display user's message
+        appendMessage(query, 'user-message');
+        queryInput.value = '';
+        queryInput.disabled = true;
+        sendButton.disabled = true;
+
+        // Create a container for the bot's streaming response
+        const botMessageContainer = appendMessage('', 'bot-message');
+        
+        try {
+            const formData = new FormData();
+            formData.append('doc_id', currentDocId);
+            formData.append('query', query);
+
+            const response = await fetch('/ask', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to get answer.');
+            }
+
+            // Process the streaming response
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value, { stream: true });
+                botMessageContainer.textContent += chunk;
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+            }
+
+        } catch (error) {
+            botMessageContainer.textContent = `Sorry, an error occurred: ${error.message}`;
+        } finally {
+            queryInput.disabled = false;
+            sendButton.disabled = false;
+            queryInput.focus();
+        }
+    });
+
+    function appendMessage(text, className) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${className}`;
+        messageDiv.textContent = text;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return messageDiv;
+    }
+</script>
+</body>
+</html>
