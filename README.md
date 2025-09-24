@@ -1,4 +1,4 @@
-# IntelliDoc-QA  
+# 💡 IntelliDoc-QA  
 
 IntelliDoc-QA is an AI-powered question-answering system for PDF documents.  
 Upload a PDF, index it into Pinecone, and ask questions through either the **FastAPI endpoints** or the built-in **web UI** powered by Jinja2 templates.  
@@ -7,7 +7,7 @@ Upload a PDF, index it into Pinecone, and ask questions through either the **Fas
 
 ## 📸 Screenshot
 
-![Web App](IntelliDoc QA1.png)
+![Web App](IntelliDocQA1.png)
 
 ---
 
