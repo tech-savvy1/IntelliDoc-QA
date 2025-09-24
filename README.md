@@ -61,10 +61,14 @@ Response: streaming answer text
 
 IntelliDoc-QA/
 ├── main.py                # FastAPI backend & endpoints
+|
 ├── requirements.txt       # Dependencies
+|
 ├── .env.example           # Example environment variables
+|
 ├── templates/
 │   └── index.html         # Web interface for chat
+|
 └── README.md
 
 ---
