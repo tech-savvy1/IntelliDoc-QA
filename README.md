@@ -57,22 +57,6 @@ Response: streaming answer text
 
 ---
 
-📂 Project Structure
-
-IntelliDoc-QA/
-├── main.py                # FastAPI backend & endpoints
-|
-├── requirements.txt       # Dependencies
-|
-├── .env.example           # Example environment variables
-|
-├── templates/
-│   └── index.html         # Web interface for chat
-|
-└── README.md
-
----
-
 ## 🚀 Getting Started  
 
 ### 1. Clone the repo  
