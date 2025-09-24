@@ -7,7 +7,7 @@ Upload a PDF, index it into Pinecone, and ask questions through either the **Fas
 
 ## 📸 Screenshot
 
-![Web App](IntelliDoc QA1.png)
+![Web App](IntelliDoc-QA1.png)
 
 ---
 
@@ -58,6 +58,7 @@ Response: streaming answer text
 ---
 
 📂 Project Structure
+
 IntelliDoc-QA/
 ├── main.py                # FastAPI backend & endpoints
 ├── requirements.txt       # Dependencies
