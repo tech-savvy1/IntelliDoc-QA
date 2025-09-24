@@ -7,7 +7,7 @@ Upload a PDF, index it into Pinecone, and ask questions through either the **Fas
 
 ## 📸 Screenshot
 
-![Web App](IntelliDoc-QA1.png)
+![Web App](IntelliDoc QA1.png)
 
 ---
 
