@@ -1,11 +1,34 @@
 # 💡 IntelliDoc-QA  
 
-IntelliDoc-QA is an AI-powered question-answering system for PDF documents.  
-Upload a PDF, index it into Pinecone, and ask questions through either the **FastAPI endpoints** or the built-in **web UI** powered by Jinja2 templates.  
+**IntelliDoc-QA** is an AI-powered document question-answering system built with **FastAPI** and **LangChain**.  
+It lets you upload a PDF, automatically index it locally with **ChromaDB**, and ask natural-language questions through a simple, built-in web interface.
 
 ---
 
-## 📸 Screenshot
+## ✨ Features  
+- 📄 Upload and process PDF files  
+- 🔍 Split text into chunks and embed them locally  
+- 🧠 Query using OpenAI’s GPT models via LangChain  
+- 💾 Uses **ChromaDB** as the local vector database (no external services)  
+- 💻 Beautiful built-in web UI (Tailwind + FastAPI)  
+- ⚙️ Works completely locally — no Pinecone or Jinja2 setup required  
+
+---
+
+## 🛠️ Tech Stack  
+- **Backend:** FastAPI + Uvicorn  
+- **LLM:** OpenAI (via `langchain-openai`)  
+- **Vector Database:** ChromaDB  
+- **Embeddings:** Sentence-Transformers (MiniLM-L6-v2)  
+- **PDF Processing:** LangChain Community’s `PyPDFLoader`  
+- **Frontend:** HTML + TailwindCSS (served directly by FastAPI)  
+- **Environment:** Python 3.10+  
+
+---
+
+## 📸 Preview  
+
+After running the app, open [http://127.0.0.1:8000/playground](http://127.0.0.1:8000/playground):
 
 ![Web App](IntelliDocQA1.png)
 ![Web App](IntelliDocQA2.png)
@@ -14,74 +37,103 @@ Upload a PDF, index it into Pinecone, and ask questions through either the **Fas
 
 ---
 
-## ✨ Features  
-- 📄 Upload and process PDF files  
-- 🔎 Split into chunks & generate embeddings (OpenAI + Pinecone)  
-- 🤖 Ask natural-language questions about the document  
-- 🌐 Web interface (`index.html`) for chat-like interaction  
-- ⚡ Real-time streaming responses  
-
----
-
-## 🛠️ Tech Stack  
-- **Backend**: FastAPI, Uvicorn  
-- **LLM / Embeddings**: OpenAI (Chat + Embeddings API)  
-- **Vector Database**: Pinecone  
-- **Document Parsing**: PyPDFLoader (LangChain Community)  
-- **Frontend**: HTML + Jinja2 templates  
-- **Other**: LangChain, dotenv, Pydantic  
-
----
-
-🌐 API Endpoints
-GET /
-
-Serves the web interface (index.html).
-
-POST /upload
-
-Upload a PDF for processing.
-
-Request: multipart/form-data with file (PDF)
-
-Response: JSON with doc_id (unique hash namespace for embeddings)
-
-POST /ask
-
-Ask a question about an uploaded PDF.
-
-Form Data:
-
-doc_id – ID from the upload step
-
-query – question in natural language
-
-Response: streaming answer text
-
----
-
 ## 🚀 Getting Started  
 
-### 1. Clone the repo  
+### 1️⃣ Clone the repository  
 ```bash
 git clone https://github.com/tech-savvy1/IntelliDoc-QA.git
 cd IntelliDoc-QA
+```
 
-2. Create a virtual environment & install dependencies
+### 2️⃣ Set up a virtual environment  
+**Windows:**
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+**Mac/Linux:**
+```bash
 python3 -m venv venv
-On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+source venv/bin/activate
+```
 
-3. Set up environment variables
+### 3️⃣ Install dependencies  
+```bash
+pip install -r requirements.txt --upgrade
+```
 
-Create a .env file in the project root with:
-
+### 4️⃣ Create a `.env` file in the root directory  
+```
 OPENAI_API_KEY=your_openai_api_key
-PINECONE_API_KEY=your_pinecone_api_key
-PINECONE_ENVIRONMENT=your_pinecone_environment
-PINECONE_INDEX_NAME=intellidoc-qa
+```
 
-4. Run the app
+💡 *No Pinecone keys are needed — ChromaDB stores everything locally.*
+
+---
+
+## ▶️ Run the App  
+Start the FastAPI server:
+```bash
 uvicorn main:app --reload
+```
 
-Visit: http://localhost:8000
+Then open in your browser:
+👉 [http://127.0.0.1:8000/playground](http://127.0.0.1:8000/playground)
+
+---
+
+## 💬 Usage Flow  
+1. **Upload a PDF** — the app extracts text and indexes it in ChromaDB.  
+2. **Ask questions** — enter a natural-language question related to the document.  
+3. **Get concise answers** — GPT analyzes the relevant chunks and responds.  
+4. **View sources** — click “Sources” to expand and see which pages were used.  
+
+---
+
+## 📂 Project Structure  
+```
+IntelliDoc-QA/
+│
+├── main.py              # FastAPI app + web UI + API endpoints
+├── requirements.txt     # Dependencies
+├── .env                 # Environment variables (API key)
+├── chroma_db/           # Local vector database (auto-created)
+├── uploads/             # Temporary uploaded files
+└── README.md            # This file
+```
+
+---
+
+## 🧰 Key Endpoints  
+
+| Method | Endpoint | Description |
+|:-------|:----------|:-------------|
+| `GET` | `/playground` | Web UI to upload & query PDFs |
+| `POST` | `/upload-and-index-pdf/` | Uploads and indexes a PDF |
+| `POST` | `/ask-question-with-sources/` | Asks a question about the indexed document |
+
+---
+
+## 🧹 Troubleshooting  
+
+**🔒 “WinError 32”**  
+If you see:  
+```
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process
+```
+→ Fixed in the latest version — uploads are written to unique temp files and auto-deleted.
+
+**🧠 No answers or empty sources?**  
+- Ensure your `.env` file contains a valid `OPENAI_API_KEY`.  
+- Try with a text-heavy PDF.  
+- Check the console for LangChain logs.
+
+---
+
+## 🧑‍💻 Credits  
+Built by **Lashiya Kashyap** using:
+- FastAPI ⚡
+- LangChain 🧠
+- ChromaDB 💾
+- Tailwind 💅
